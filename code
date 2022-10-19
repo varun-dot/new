@@ -1,0 +1,67 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Data.SqlClient;
+using System.Data;
+using System.Configuration;
+
+namespace DropDownLists
+{
+    public partial class statecity : System.Web.UI.Page
+    {      void getState()
+        {
+
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["cs"].ToString());
+            SqlCommand cmd = new SqlCommand("Getstate", con);
+            SqlDataAdapter da = new SqlDataAdapter(cmd);
+            DataSet ds = new DataSet();
+            da.Fill(ds);
+            DropDownList1.DataSource = ds;
+            DropDownList1.DataTextField = "statename";
+            DropDownList1.DataValueField = "stateid";
+            DropDownList1.DataBind();
+            DropDownList1.Items.Insert(0, "---Select---");
+        }
+        protected void Page_Load(object sender, EventArgs e)
+        {
+            if (IsPostBack == false)
+            {
+                getState();
+            }
+        }
+
+        protected void DropDownList1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["cs"].ToString());
+         //inform that we are using stored procedure
+            SqlCommand cmd = new SqlCommand("Getcities",con);
+            SqlDataAdapter da = new SqlDataAdapter(cmd);
+            cmd.CommandType = CommandType.StoredProcedure;
+            //pass value to database
+            cmd.Parameters.AddWithValue("@stateid", DropDownList1.SelectedItem.Value);
+            //create dataset object
+            DataSet ds = new DataSet();
+            //fill data
+            da.Fill(ds,"city");
+            //provide link between Dropdownlist to datasource
+            DropDownList2.DataSource = ds;
+            DropDownList2.DataTextField = "cname";
+            DropDownList2.DataValueField = "cid";
+            //bind data
+            DropDownList2.DataBind();
+            DropDownList2.Items.Insert(0, "---Select---");
+        }
+
+        protected void SelectButton_Click(object sender, EventArgs e)
+        {
+            Label1.Visible = true;
+            Label1.Text = " Your State is " +DropDownList1.SelectedItem.Text;
+            Label2.Visible = true;
+            Label2.Text = " Your City is " + DropDownList2.SelectedItem.Text;
+        }
+    }
+}
